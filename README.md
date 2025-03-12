@@ -1,8 +1,22 @@
 # Robust CSharp CRUD
+* .NET Core Web API
+* Ember.js
+* SQL Server
+* EF Core
+* Dapper.FastCRUD
+* Serilog
+* Development, Testing, Staging, and Production Environments:
+    * Development Environment (Dev)
+    * Test Environment (Test)
+    * Staging Environment (Staging)
+    * Production Environment (Production)
+* Development, Testing, Staging, and Production Environments
+    * https://learn.microsoft.com/en-us/biztalk/technical-guides/planning-the-development-testing-staging-and-production-environments
+    * https://www.linkedin.com/pulse/guide-dev-test-staging-production-environments-george-lebbos/
 
-# Integrate Ember.js with your .NET Core API, follow these steps:
+# Integrate Ember.js with your .NET Core API
 
-Steps to Integrate Ember.js
+## Steps to Integrate Ember.js
 
 * Set up Ember.js frontend
 * Enable CORS in .NET Core API
