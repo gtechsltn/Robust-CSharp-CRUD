@@ -56,7 +56,7 @@ export default class ApplicationAdapter extends JSONAPIAdapter {
 }
 ```
 
-Fetch Products in Ember Model
+#### Fetch Products in Ember Model
 
 Modify ember-app/app/models/product.js:
 
@@ -69,7 +69,7 @@ export default class ProductModel extends Model {
 }
 ```
 
-List Products in Ember Route
+#### List Products in Ember Route
 
 Modify ember-app/app/routes/products.js:
 
@@ -83,7 +83,7 @@ export default class ProductsRoute extends Route {
 }
 ```
 
-Render Products in Ember Template
+#### Render Products in Ember Template
 
 Modify ember-app/app/templates/products.hbs:
 
@@ -96,7 +96,7 @@ Modify ember-app/app/templates/products.hbs:
 </ul>
 ```
 
-Run Everything
+#### Run Everything
 
 Start .NET Core API
 ```
@@ -189,9 +189,9 @@ Then start both:
 
 This will proxy API requests from Ember.js to your .NET Core API without CORS issues.
 
-# Final Thoughts
-## Use Solution 1 for Production (serving Ember from .NET Core).
-## Use Solution 2 for Development (proxy for API requests).
+## Final Thoughts
+* Use Solution 1 for Production (serving Ember from .NET Core).
+* Use Solution 2 for Development (proxy for API requests).
 
 ## PowerShell Automation script to deploy your .NET Core application to IIS using MSBuild:
 ```
