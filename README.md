@@ -434,6 +434,117 @@ public void ConfigureServices(IServiceCollection services)
 
 **Let me know if you need any further modifications! 🚀**
 
+## For handling large file uploads/downloads, the maximum file size depends on several factors:
+
+### 1. Default ASP.NET Core Limits
+By default, ASP.NET Core has a **30MB** file upload limit. This can be increased via Startup.cs or appsettings.json.
+
+### 2. Maximum File Size Support
+* IIS (Internet Information Services) → Supports up to **4GB** per request.
+* Kestrel (Default ASP.NET Core Web Server) → Theoretically supports files **larger than 4GB**, depending on system resources.
+* Azure App Service → Limits vary (default **2GB**, **configurable**).
+
+## Configuring ASP.NET Core for Large File Uploads
+
+### 1. Configure Startup.cs to Increase Limits
+
+Modify the ConfigureServices method:
+```
+public void ConfigureServices(IServiceCollection services)
+{
+    services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = long.MaxValue; // Supports files >4GB
+    });
+
+    services.AddControllers();
+}
+```
+
+This removes the default restriction on file upload size.
+
+### 2. Configure appsettings.json for Kestrel
+
+To allow large file uploads in Kestrel, modify appsettings.json:
+```
+{
+  "Kestrel": {
+    "Limits": {
+      "MaxRequestBodySize": 4294967295  // 4GB
+    }
+  }
+}
+```
+
+### 3. Modify web.config (For IIS Hosting)
+If using IIS, modify web.config:
+```
+<configuration>
+  <system.webServer>
+    <security>
+      <requestFiltering>
+        <requestLimits maxAllowedContentLength="4294967295" /> <!-- 4GB -->
+      </requestFiltering>
+    </security>
+  </system.webServer>
+</configuration>
+```
+
+* maxAllowedContentLength="4294967295" → Allows **4GB** file uploads.
+
+## Handling Large File Uploads Efficiently
+
+Use Streaming Instead of Memory Loading
+
+For very large files, process them as a stream:
+```
+[HttpPost("upload")]
+public async Task<IActionResult> UploadFile(IFormFile file)
+{
+    if (file == null || file.Length == 0)
+        return BadRequest("No file uploaded.");
+
+    var filePath = Path.Combine("Uploads", file.FileName);
+
+    using (var stream = new FileStream(filePath, FileMode.Create))
+    {
+        await file.CopyToAsync(stream); // Writes file directly to disk
+    }
+
+    return Ok(new { FileName = file.FileName, FilePath = filePath });
+}
+```
+
+This prevents excessive memory usage.
+
+## Handling Large File Downloads Efficiently
+
+Use FileStreamResult to avoid memory overflows:
+
+```
+[HttpGet("download/{fileName}")]
+public IActionResult DownloadFile(string fileName)
+{
+    var filePath = Path.Combine("Uploads", fileName);
+    
+    if (!System.IO.File.Exists(filePath))
+        return NotFound();
+
+    var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+    return File(stream, "application/octet-stream", fileName);
+}
+```
+
+* **Streams data** instead of loading the entire file into memory.
+
+
+### Final Notes
+* ✅ For Files >4GB, avoid IIS and use Kestrel.
+* ✅ Use streaming for memory-efficient processing.
+* ✅ For Cloud Hosting (e.g., Azure), consider Blob Storage for large files.
+
+**Let me know if you need more tweaks! 🚀**
+
 ## Add Dapper.FastCRUD
 ```
     public class ProductService : IProductService
