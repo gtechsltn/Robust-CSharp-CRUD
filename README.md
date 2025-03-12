@@ -1,5 +1,48 @@
 # Robust CSharp CRUD
 
+## Add Dapper.FastCRUD
+```
+    public class ProductService : IProductService
+    {
+        private readonly string _connectionString;
+
+        public ProductService(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
+        }
+
+        public async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.FindAsync<Product>();
+        }
+
+        public async Task<Product> GetByIdAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.GetAsync(new Product { Id = id });
+        }
+
+        public async Task AddAsync(Product product)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.InsertAsync(product);
+        }
+
+        public async Task UpdateAsync(Product product)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.UpdateAsync(product);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            await connection.DeleteAsync(new Product { Id = id });
+        }
+    }
+```
+
 ## Add to use the PROD, STAG, DEVELOP environment
 ```
 public static IHostBuilder CreateHostBuilder(string[] args) =>
