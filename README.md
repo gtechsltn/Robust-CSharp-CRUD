@@ -1,8 +1,11 @@
 # Robust CSharp CRUD
-* .NET Core Web API
+* Windows Server 2022
+* Web Server (IIS) 10.0
+* .NET Core Web API 9.0
 * Ember.js
-* SQL Server
-* EF Core
+* SQL Server 2022
+* EF Core 9.0
+* Dapper
 * Dapper.FastCRUD
 * Serilog
 * Development, Testing, Staging, and Production Environments:
