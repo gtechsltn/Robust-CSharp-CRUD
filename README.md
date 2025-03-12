@@ -263,6 +263,177 @@ Write-Host "Deployment completed successfully!"
 </Project>
 ```
 
+## Add to support large file upload and download in your API, you need to handle streaming efficiently to avoid memory overload.
+
+Here's how you can modify your project:
+
+### 1. Add File Upload Endpoint
+
+Modify your ProductsController to support file uploads:
+
+```
+[HttpPost("upload")]
+public async Task<IActionResult> UploadFile(IFormFile file)
+{
+    if (file == null || file.Length == 0)
+        return BadRequest("No file uploaded.");
+
+    var filePath = Path.Combine("Uploads", file.FileName);
+
+    using (var stream = new FileStream(filePath, FileMode.Create))
+    {
+        await file.CopyToAsync(stream);
+    }
+
+    return Ok(new { FileName = file.FileName, FilePath = filePath });
+}
+```
+
+**Key Points:**
+
+* Uses IFormFile to receive uploaded files.
+* Saves them to an Uploads folder.
+
+### 2. Add Large File Download Endpoint
+
+Modify your ProductsController to support file downloads:
+
+```
+[HttpGet("download/{fileName}")]
+public IActionResult DownloadFile(string fileName)
+{
+    var filePath = Path.Combine("Uploads", fileName);
+
+    if (!System.IO.File.Exists(filePath))
+        return NotFound();
+
+    var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+    return File(stream, "application/octet-stream", fileName);
+}
+```
+
+**Key Points:**
+
+* Uses a FileStream to stream files instead of loading them fully into memory.
+* Returns the file with application/octet-stream for generic downloads.
+
+### 3. Configure IIS & Kestrel for Large File Uploads
+
+By default, ASP.NET Core limits file uploads to 30MB. You can increase this in appsettings.json:
+```
+{
+  "Kestrel": {
+    "Limits": {
+      "MaxRequestBodySize": 1073741824  // 1GB
+    }
+  }
+}
+```
+
+**For IIS, modify web.config:**
+```
+<configuration>
+  <system.webServer>
+    <security>
+      <requestFiltering>
+        <requestLimits maxAllowedContentLength="2147483648" /> <!-- 2GB -->
+      </requestFiltering>
+    </security>
+  </system.webServer>
+</configuration>
+```
+
+### 4. Enable Form Handling in Startup.cs
+
+Ensure that large file handling is enabled:
+
+```
+public void ConfigureServices(IServiceCollection services)
+{
+    services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 1073741824; // 1GB
+    });
+
+    services.AddControllers();
+}
+```
+
+**Now your API supports large file uploads and downloads! 🚀 Let me know if you need further refinements!**
+
+## To configure machine.config to support 4GB file uploads, follow these steps:
+
+### 1. Modify machine.config (For IIS Hosting)
+
+The machine.config file is typically located in:
+
+* For 32-bit systems: C:\Windows\Microsoft.NET\Framework\v4.0.30319\Config\
+* For 64-bit systems: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\
+
+Inside machine.config, modify or add the <system.web> section:
+```
+<configuration>
+  <system.web>
+    <httpRuntime maxRequestLength="4194304" executionTimeout="3600" />
+  </system.web>
+</configuration>
+```
+
+* maxRequestLength="4194304" → Allows 4GB file uploads.
+* executionTimeout="3600" → Increases timeout to 1 hour for large files.
+
+### 2. Modify web.config (For Application-Level Settings)
+
+If you're using IIS with your .NET Core app, you should also modify web.config:
+```
+<configuration>
+  <system.webServer>
+    <security>
+      <requestFiltering>
+        <requestLimits maxAllowedContentLength="4294967295" /> <!-- 4GB -->
+      </requestFiltering>
+    </security>
+  </system.webServer>
+</configuration>
+```
+
+* maxAllowedContentLength="4294967295" → Allows up to 4GB file uploads.
+
+### 3. Modify appsettings.json (For Kestrel)
+
+If your API is running directly with Kestrel, update appsettings.json:
+```
+{
+  "Kestrel": {
+    "Limits": {
+      "MaxRequestBodySize": 4294967295
+    }
+  }
+}
+```
+
+### 4. Modify Startup.cs
+
+Ensure the application is configured to allow large file uploads:
+```
+public void ConfigureServices(IServiceCollection services)
+{
+    services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 4294967295; // 4GB
+    });
+
+    services.AddControllers();
+}
+```
+
+### Final Notes
+* ✅ If hosting on IIS, machine.config + web.config settings must be updated.
+* ✅ If using Kestrel, modify appsettings.json and Startup.cs.
+* ✅ For Azure or Cloud Deployments, verify file size limits in storage configurations.
+
+**Let me know if you need any further modifications! 🚀**
+
 ## Add Dapper.FastCRUD
 ```
     public class ProductService : IProductService
