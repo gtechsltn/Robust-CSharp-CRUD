@@ -1,5 +1,23 @@
 # Robust CSharp CRUD
 
+## Add to use the PROD, STAG, DEVELOP environment
+```
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .UseSerilog()
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            })
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                var env = hostingContext.HostingEnvironment.EnvironmentName;
+                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                      .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+                      .AddEnvironmentVariables();
+            });
+```
+
 ## Add serilog and configure to use the SQL Server
 ```
 using System;
